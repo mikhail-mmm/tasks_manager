@@ -1,8 +1,10 @@
 from sqlalchemy import Column, String, Integer, DateTime, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from typing import Any
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.schema import MetaData
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    metadata = MetaData()
 
 
 class Tasks(Base):
