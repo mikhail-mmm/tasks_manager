@@ -1,4 +1,6 @@
 from datetime import date
+from dateutil.parser import parse
+from dateutil.parser._parser import ParserError
 
 from rich.console import Console
 from rich.table import Table
@@ -27,17 +29,8 @@ def create_print_table_done_task() -> Table:
 
 
 def str_to_date(input_date_str: str) -> date | None:
-    if "." in input_date_str:
-        date_parts = input_date_str.split('.')
-        if len(date_parts) == 3:
-            try:
-                date_parts_int = [int(item) for item in date_parts]
-                return_date = date(date_parts_int[2], date_parts_int[1], date_parts_int[0])
-                delta_date = return_date - date.today()
-                if delta_date.days > 0:
-                    return return_date
-            except ValueError:
-                return None
-        return None
-    else:
+    try:
+        date_datetime = parse(input_date_str).date()
+        return date_datetime
+    except ParserError:
         return None

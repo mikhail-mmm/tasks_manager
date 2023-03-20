@@ -1,8 +1,8 @@
 import fire
 
-from db.utils_db import (insert_task, get_undone_tasks, delete_done_tasks,
+from db.utils_db import (insert_task, get_undone_tasks, delete_history,
                          change_task_status, get_done_tasks, change_deadline,
-                         delete_all_tasks)
+                         delete_all)
 from pathlib import Path
 from rich.markdown import Markdown
 from utils import (create_print_table_undone_task, create_print_table_done_task,
@@ -16,7 +16,7 @@ class TaskManager:
         if deadline_datetime:
             if insert_task(task, deadline_datetime):
                 return console.print(
-                    f"Задача {task} добавлена успешно! Deadline: {deadline}",
+                    f"Задача {task} добавлена! Deadline: {deadline}",
                     "\n:thumbs_up:",
                     style="bold green",
                 )
@@ -36,18 +36,33 @@ class TaskManager:
 
     def show(self) -> None:
         table = create_print_table_undone_task()
-        undone_task = get_undone_tasks()
-        if undone_task:
-            for i in range(len(undone_task.id)):
+        undone_tasks = get_undone_tasks()
+        if undone_tasks:
+            for row in undone_tasks:
                 table.add_row(
-                    str(undone_task.id[i]), undone_task.tasks[i], undone_task.creation_dates[i],
-                    undone_task.deadlines[i], f"{undone_task.time_left[i]} day(s)",
+                    str(row.id), row.task_name, row.creation_date,
+                    row.deadline, row.other,
                     )
             return console.print(table)
         return console.print(
                     "Ошибка. Нет связи с БД! Или БД пуста!",
                     style="bold red",
                 )
+
+    def history(self) -> None:
+        table = create_print_table_done_task()
+        done_tasks = get_done_tasks()
+        if done_tasks:
+            for row in done_tasks:
+                table.add_row(
+                    str(row.id), row.task_name, row.creation_date,
+                    row.deadline, row.other,
+                    )
+            return console.print(table)
+        return console.print(
+            "Ошибка. Нет связи с БД! Или БД пуста!",
+            style="bold red"
+        )
 
     def move(self, selected_task: str) -> None:
         if change_task_status(int(selected_task)):
@@ -61,21 +76,6 @@ class TaskManager:
             "\n:thumbs_down:",
             "\nПопробуйте вызвать команду <show>, чтобы убедиться в правильности номера задачи.",
             "\nИли убедитесь, что база данных доступна.",
-            style="bold red"
-        )
-
-    def history(self) -> None:
-        table = create_print_table_done_task()
-        done_task = get_done_tasks()
-        if done_task:
-            for i in range(len(done_task.id)):
-                table.add_row(
-                    str(done_task.id[i]), done_task.tasks[i], done_task.creation_dates[i],
-                    done_task.deadlines[i], "Done",
-                    )
-            return console.print(table)
-        return console.print(
-            "Ошибка. Нет связи с БД! Или БД пуста!",
             style="bold red"
         )
 
@@ -107,7 +107,7 @@ class TaskManager:
 
     def remove(self, arg: str = 'done') -> None:
         if arg == 'done':
-            if delete_done_tasks():
+            if delete_history():
                 return console.print(
                     "Выполненные задачи удалены!",
                     style="bold red",
@@ -117,7 +117,7 @@ class TaskManager:
                     style="bold red",
                 )
         elif arg == 'all':
-            if delete_all_tasks():
+            if delete_all():
                 return console.print(
                     "Все задачи удалены!",
                     style="bold red",

@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Integer, DateTime, Boolean
-from sqlalchemy.orm import DeclarativeBase
+from datetime import date
+from sqlalchemy import Table, Column, String, Integer, Date, Boolean
+from sqlalchemy.orm import DeclarativeBase, Mapped
 from sqlalchemy.schema import MetaData
 
 
@@ -8,10 +9,19 @@ class Base(DeclarativeBase):
 
 
 class Tasks(Base):
-    __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True)
-    task = Column(String)
-    creation_date = Column(DateTime)
-    deadline = Column(DateTime)
-    status = Column(Boolean)
+    __table__ = Table(
+        "tasks",
+        Base.metadata,
+        Column("id", Integer, primary_key=True),
+        Column("task", String),
+        Column("creation_date", Date),
+        Column("deadline", Date),
+        Column("status", Boolean),
+    )
+
+    id: Mapped[int]
+    task: Mapped[str]
+    creation_date: Mapped[date]
+    deadline: Mapped[date]
+    status: Mapped[bool]
