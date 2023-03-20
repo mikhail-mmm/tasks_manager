@@ -1,6 +1,6 @@
 from datetime import date
 from dateutil.parser import parse
-from dateutil.parser._parser import ParserError
+from dateutil.parser import ParserError
 
 from rich.console import Console
 from rich.table import Table
@@ -28,9 +28,9 @@ def create_print_table_done_task() -> Table:
     return table
 
 
-def str_to_date(input_date_str: str) -> date | None:
+def str_to_date(input_date_str: str) -> date:
     try:
         date_datetime = parse(input_date_str).date()
         return date_datetime
     except ParserError:
-        return None
+        pass
