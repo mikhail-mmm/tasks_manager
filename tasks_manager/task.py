@@ -1,11 +1,17 @@
+from datetime import date
+
+from db.db_classes import TaskStatusSymbol
+from db.utils_db import (insert_task, get_tasks, delete_done_tasks,
+                         change_task_status_to_done, change_deadline,
+                         delete_all)
+
 import fire
 
-from db.utils_db import (insert_task, get_undone_tasks, delete_history,
-                         change_task_status, get_done_tasks, change_deadline,
-                         delete_all)
 from pathlib import Path
+
 from rich.markdown import Markdown
-from utils import (create_print_table_undone_task, create_print_table_done_task,
+
+from utils import (create_print_table_undone_tasks, create_print_table_done_tasks,
                    str_to_date, console)
 
 
@@ -35,47 +41,47 @@ class TaskManager:
             )
 
     def show(self) -> None:
-        table = create_print_table_undone_task()
-        undone_tasks = get_undone_tasks()
-        if undone_tasks:
-            for row in undone_tasks:
+        table = create_print_table_undone_tasks()
+        tasks = get_tasks(TaskStatusSymbol.Undone.value)
+        if tasks:
+            for row in tasks:
+                left_time = (row.deadline - row.created_at).days
                 table.add_row(
-                    str(row.id), row.task_name, row.creation_date,
-                    row.deadline, row.other,
+                    str(row.id), row.task_name, date.strftime(row.created_at, '%d.%m.%Y'),
+                    date.strftime(row.deadline, '%d.%m.%Y'), f"{left_time} day(s)",
                     )
             return console.print(table)
         return console.print(
-                    "Ошибка. Нет связи с БД! Или БД пуста!",
+                    "Нет выполняемых задач!",
                     style="bold red",
                 )
 
     def history(self) -> None:
-        table = create_print_table_done_task()
-        done_tasks = get_done_tasks()
+        table = create_print_table_done_tasks()
+        done_tasks = get_tasks(TaskStatusSymbol.Done.value)
         if done_tasks:
             for row in done_tasks:
                 table.add_row(
-                    str(row.id), row.task_name, row.creation_date,
-                    row.deadline, row.other,
+                    str(row.id), row.task_name, date.strftime(row.created_at, '%d.%m.%Y'),
+                    date.strftime(row.deadline, '%d.%m.%Y'), row.status,
                     )
             return console.print(table)
         return console.print(
-            "Ошибка. Нет связи с БД! Или БД пуста!",
+            "Нет выполненных задач!",
             style="bold red"
         )
 
     def move(self, selected_task: str) -> None:
-        if change_task_status(int(selected_task)):
+        if change_task_status_to_done(int(selected_task)):
             return console.print(
                     f"Задача номер {selected_task} выполнена!",
                     "\n:thumbs_up:",
                     style="bold green",
                 )
         return console.print(
-            f"Задача номер {selected_task} не найдена!",
+            f"Задача номер {selected_task} не найдена или уже выполнена!",
             "\n:thumbs_down:",
             "\nПопробуйте вызвать команду <show>, чтобы убедиться в правильности номера задачи.",
-            "\nИли убедитесь, что база данных доступна.",
             style="bold red"
         )
 
@@ -90,10 +96,9 @@ class TaskManager:
                     )
             else:
                 return console.print(
-                    f"Задача номер {task_number} не найдена!",
+                    f"Задача номер {task_number} не найдена или вы пытаетесь изменить дедлайн уже выполненной задачи!",
                     "\n:thumbs_down:",
                     "\nПопробуйте вызвать команду <show>, чтобы убедиться в правильности номера задачи.",
-                    "\nИли убедитесь, что база данных доступна.",
                     style="bold red"
                 )
         else:
@@ -107,25 +112,17 @@ class TaskManager:
 
     def remove(self, arg: str = 'done') -> None:
         if arg == 'done':
-            if delete_history():
-                return console.print(
-                    "Выполненные задачи удалены!",
-                    style="bold red",
-                )
+            delete_done_tasks()
             return console.print(
-                    "Ошибка. Нет связи с БД! Или БД пуста!",
-                    style="bold red",
-                )
+                "Выполненные задачи удалены!",
+                style="bold red",
+            )
         elif arg == 'all':
-            if delete_all():
-                return console.print(
-                    "Все задачи удалены!",
-                    style="bold red",
-                )
+            delete_all()
             return console.print(
-                    "Ошибка. Нет связи с БД! Или БД пуста!",
-                    style="bold red",
-                )
+                "Все задачи удалены!",
+                style="bold red",
+            )
 
     def help(self) -> None:
         with open("HELP.md") as help:
