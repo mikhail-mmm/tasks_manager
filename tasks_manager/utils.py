@@ -3,7 +3,7 @@ from datetime import date, datetime
 from rich.console import Console
 from rich.table import Table
 
-console = Console()
+CONSOLE = Console()
 
 
 def create_print_table_undone_tasks() -> Table:

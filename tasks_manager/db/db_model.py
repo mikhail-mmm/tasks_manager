@@ -1,7 +1,7 @@
-from datetime import date
+import enum
 
-from sqlalchemy import Table, Column, String, Integer, Date
-from sqlalchemy.orm import DeclarativeBase, Mapped
+from sqlalchemy import Column, String, Integer, Date, Enum
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import MetaData
 
 
@@ -9,20 +9,21 @@ class Base(DeclarativeBase):
     metadata = MetaData()
 
 
+class TaskStatus(enum.Enum):
+    Done = "Done"
+    Undone = "Undone"
+
+
 class TaskModel(Base):
+    Base.metadata
 
-    __table__ = Table(
-        "tasks",
-        Base.metadata,
-        Column("id", Integer, primary_key=True),
-        Column("task", String),
-        Column("created_at", Date),
-        Column("deadline", Date),
-        Column("status", String),
-    )
+    __tablename__ = "tasks"
 
-    id: Mapped[int]
-    task: Mapped[str]
-    created_at: Mapped[date]
-    deadline: Mapped[date]
-    status: Mapped[str]
+    id = Column(Integer, primary_key=True)
+    task = Column(String)
+    created_at = Column(Date)
+    deadline = Column(Date)
+    status = Column(Enum(TaskStatus))
+
+    def __str__(self) -> str:
+        return f"{self.task} {self.created_at} {self.deadline} {self.status.value}"

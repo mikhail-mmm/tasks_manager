@@ -10,9 +10,4 @@ class Task:
     task_name: str
     created_at: date
     deadline: date
-    status: str
-
-
-class TaskStatusSymbol(enum.Enum):
-    Done = "Done"
-    Undone = "Undone"
+    status: enum.Enum
