@@ -1,0 +1,11 @@
+services:
+  db_tasks_manager:
+    container_name: tasks_manager
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=123123
+      - POSTGRES_USER=username
+      - POSTGRES_DB=tasks
+    image: postgres:15.2-alpine
+    
