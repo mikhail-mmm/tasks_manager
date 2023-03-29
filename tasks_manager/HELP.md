@@ -1,7 +1,7 @@
 ## Список доступных команд
 
-1. `python task.py add <task> <deadline>` - добавляет задачу.
-    - `<task>` - название задачи,
+1. `python task.py add <"task"> <deadline>` - добавляет задачу.
+    - `<"task">` - название задачи,
     - `<deadline>` - дедлайн, формат ввода: ДД.ММ.ГГГГ.
 2. `python task.py show` - выводит список невыполненных задач 
 3. `python task.py move <task_number>` - изменяет статус задачи на выполненно.

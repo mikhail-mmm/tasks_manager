@@ -1,9 +1,10 @@
 from datetime import date
 
-from db.db_model import TaskStatus
-from db.utils_db import (insert_task, get_tasks, delete_done_tasks,
-                         change_task_status_to_done, change_deadline,
-                         delete_all_tasks)
+from db.utils_db import (
+    insert_task, get_tasks, delete_done_tasks,
+    change_task_status_to_done, change_deadline,
+    delete_all_tasks, is_task_in_db, is_undone_task,
+)
 
 import fire
 
@@ -11,8 +12,12 @@ from pathlib import Path
 
 from rich.markdown import Markdown
 
-from utils import (create_print_table_undone_tasks, create_print_table_done_tasks,
-                   str_to_date, CONSOLE)
+from task_classes import TaskStatus
+
+from utils import (
+    create_print_table_undone_tasks, create_print_table_done_tasks,
+    str_to_date, CONSOLE,
+)
 
 
 class TaskManager:
@@ -22,9 +27,7 @@ class TaskManager:
         if deadline_datetime:
             inserted_task = insert_task(task, deadline_datetime)
             return CONSOLE.print(
-                f"Задача {task} добавлена!",
-                f"\n{inserted_task}"
-                "\n:thumbs_up:",
+                f"Задача {task} добавлена!\n{inserted_task}\n:thumbs_up:",
                 style="bold green",
             )
         else:
@@ -67,16 +70,16 @@ class TaskManager:
             style="bold red",
         )
 
-    def move(self, selected_task: str) -> None:
-        changed_status = change_task_status_to_done(int(selected_task))
-        if changed_status:
+    def move(self, task_number: str) -> None:
+        if is_task_in_db(task_number) and is_undone_task(task_number):
+            change_task_status_to_done(int(task_number))
             return CONSOLE.print(
-                f"Статус задачи {selected_task} изменен на {changed_status}!",
+                f"Задача {task_number} выполнена!",
                 "\n:thumbs_up:",
                 style="bold green",
             )
         return CONSOLE.print(
-            f"Задача номер {selected_task} не найдена или уже выполнена!",
+            f"Задача номер {task_number} не найдена или уже выполнена!",
             "\n:thumbs_down:",
             "\nПопробуйте вызвать команду <show>, чтобы убедиться в правильности номера задачи.",
             style="bold red",
@@ -85,10 +88,10 @@ class TaskManager:
     def change(self, task_number: str, new_deadline: str) -> None:
         deadline_datetime = str_to_date(new_deadline)
         if deadline_datetime:
-            changed_deadline = change_deadline(int(task_number), deadline_datetime)
-            if changed_deadline:
+            if is_task_in_db(task_number) and is_undone_task(task_number):
+                change_deadline(int(task_number), deadline_datetime)
                 return CONSOLE.print(
-                    f"Дедлайн задачи {task_number} изменен на {changed_deadline}!",
+                    f"Дедлайн задачи {task_number} изменен на {new_deadline}!",
                     "\n:thumbs_up:",
                     style="bold green",
                 )

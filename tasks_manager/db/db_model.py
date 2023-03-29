@@ -1,17 +1,12 @@
-import enum
-
 from sqlalchemy import Column, String, Integer, Date, Enum
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import MetaData
 
+from task_classes import TaskStatus
+
 
 class Base(DeclarativeBase):
     metadata = MetaData()
-
-
-class TaskStatus(enum.Enum):
-    Done = "Done"
-    Undone = "Undone"
 
 
 class TaskModel(Base):
@@ -23,7 +18,7 @@ class TaskModel(Base):
     task = Column(String)
     created_at = Column(Date)
     deadline = Column(Date)
-    status = Column(Enum(TaskStatus))
+    status: TaskStatus = Column(Enum(TaskStatus))
 
     def __str__(self) -> str:
         return f"{self.task} {self.created_at} {self.deadline} {self.status.value}"

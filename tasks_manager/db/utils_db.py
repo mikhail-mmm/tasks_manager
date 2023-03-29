@@ -3,12 +3,13 @@ import sys
 
 from datetime import date
 
-from db.db_classes import Task
 from db.db_creation import connect_db
-from db.db_model import TaskModel, TaskStatus
+from db.db_model import TaskModel
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import OperationalError
+
+from task_classes import Task, TaskStatus
 
 from utils import CONSOLE
 
@@ -55,23 +56,26 @@ def delete_all_tasks() -> None:
     SESSION.commit()
 
 
-def change_task_status_to_done(task_number: int) -> str | None:
-    if SESSION.query(TaskModel).filter_by(id=task_number).first() is not None:
-        row = SESSION.query(TaskModel).get(task_number)
-        if row.status == TaskStatus.Undone:
-            row.status = TaskStatus.Done
-            SESSION.commit()
-            changed_status_task = SESSION.query(TaskModel).get(task_number)
-            return changed_status_task.status.value
-    return None
+def change_task_status_to_done(task_number: int) -> None:
+    row = SESSION.query(TaskModel).get(task_number)
+    row.status = TaskStatus.Done
+    SESSION.commit()
 
 
-def change_deadline(task_number: int, new_deadline: date) -> date | None:
+def change_deadline(task_number: int, new_deadline: date) -> None:
+    row = SESSION.query(TaskModel).get(task_number)
+    row.deadline = new_deadline
+    SESSION.commit()
+
+
+def is_task_in_db(task_number: int) -> bool:
     if SESSION.query(TaskModel).filter_by(id=task_number).first() is not None:
-        row = SESSION.query(TaskModel).get(task_number)
-        if row.status == TaskStatus.Undone:
-            row.deadline = new_deadline
-            SESSION.commit()
-            changed_deadline_task = SESSION.query(TaskModel).get(task_number)
-            return changed_deadline_task.deadline
-    return None
+        return True
+    return False
+
+
+def is_undone_task(task_number: int) -> bool:
+    row = SESSION.query(TaskModel).get(task_number)
+    if row.status == TaskStatus.Undone:
+        return True
+    return False

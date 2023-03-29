@@ -7,8 +7,8 @@
 
 ### Запуск
 
-1. Для добавления задачи `python task.py add <task> <deadline>`.
-    - `<task>` - название задачи,
+1. Для добавления задачи `python task.py add <"task"> <deadline>`.
+    - `<"task">` - название задачи,
     - `<deadline>` - дедлайн, формат ввода: ДД.ММ.ГГГГ.
 2. Для вывода списка невыполненных задач `python task.py show`.
 3. Для изменения статуса задачи `python task.py move <task_number>`.

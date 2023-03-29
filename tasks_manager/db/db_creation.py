@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 
 def connect_db() -> tuple[Engine, Session]:
-    db = create_engine(get_connection_dsn(get_config()), echo=True)
+    db = create_engine(get_connection_dsn(get_config()), echo=False)
     Base.metadata.create_all(db)
     session = Session(db)
     return db, session
